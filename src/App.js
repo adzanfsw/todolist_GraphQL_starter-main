@@ -13,8 +13,19 @@ const GetTodolist = gql`
   }
 `;
 
+const GetByUserId = gql`
+  query MyQuery ($user_id: Int!) {
+    todolist (where: {user_id: {_eq: $user_id}}) {
+      is_done
+      id
+      title
+    }
+  }
+`;
+
 function TodoList() {
-  const [getTodo, {data, error}] = useLazyQuery(GetTodolist);
+  const [getTodo, {data, error}] = useLazyQuery(GetByUserId);
+  const [userId, setUserId] = useState(0);
   const [list, setList] = useState([]);
   const [title, setTitle] = useState('');
 
@@ -47,13 +58,23 @@ function TodoList() {
   };
 
   const GetData = () => {
-    getTodo()
+    getTodo({variables: {
+      user_id: userId
+    },
+  });
     setList(data?.todolist)
+  }
+
+  const onChangeUserId = (e) => {
+    if (e.target) {
+      setUserId(e.target.value)
+    }
   }
 
   return (
     <>
       <div className='container'>
+        <input value={userId} onChange={onChangeUserId} />
         <button onClick={GetData}>Get Data</button>
         <h1 className='app-title'>todos</h1>
         <ul className='todo-list js-todo-list'>
